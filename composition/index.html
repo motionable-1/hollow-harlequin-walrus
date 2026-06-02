@@ -3,13 +3,17 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Hyperframes Composition</title>
+  <title>Cart-Venture - Product Hunt Launch Promo</title>
+  
+  <!-- Premium Font Pairings -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
   <style>
     :root {
-      color-scheme: light;
-      font-family: Inter, sans-serif;
-      background: transparent;
-      color: #18161d;
+      color-scheme: dark;
+      font-family: 'Inter', sans-serif;
       font-kerning: normal;
       text-rendering: geometricPrecision;
       -webkit-font-smoothing: antialiased;
@@ -18,219 +22,1690 @@
 
     * {
       box-sizing: border-box;
+      margin: 0;
+      padding: 0;
     }
 
-    html,
-    body {
+    html, body {
       width: 100%;
       height: 100%;
-      margin: 0;
       overflow: hidden;
-      background: #fbfaf7;
+      background: #09080f;
     }
 
+    /* Video Canvas Viewport */
     #stage {
       position: relative;
       width: 1920px;
       height: 1080px;
       overflow: hidden;
-      background:
-        radial-gradient(circle at 72% 16%, rgb(169 139 255 / 0.24), transparent 30%),
-        radial-gradient(circle at 22% 80%, rgb(255 255 255 / 0.98), transparent 34%),
-        linear-gradient(180deg, #fbfaf7 0%, #f7f4fb 100%);
+      background: #09080f;
+      transform-origin: top left;
     }
 
-    .preview-pending-motion {
+    /* Shared Ambient Background Layer */
+    .ambient-bg {
+      position: absolute;
+      inset: 0;
+      z-index: 1;
+      overflow: hidden;
+      pointer-events: none;
+    }
+
+    .ambient-glow-1 {
+      position: absolute;
+      width: 800px;
+      height: 800px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(110, 99, 255, 0.15) 0%, transparent 70%);
+      top: -200px;
+      right: -200px;
+      will-change: transform;
+    }
+
+    .ambient-glow-2 {
+      position: absolute;
+      width: 900px;
+      height: 900px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(239, 131, 84, 0.08) 0%, transparent 70%);
+      bottom: -300px;
+      left: -200px;
+      will-change: transform;
+    }
+
+    .ambient-grid {
+      position: absolute;
+      inset: 0;
+      background-image: 
+        linear-gradient(90deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px),
+        linear-gradient(180deg, rgba(255, 255, 255, 0.02) 1px, transparent 1px);
+      background-size: 80px 80px;
+      opacity: 0.6;
+      mask-image: radial-gradient(ellipse at center, black 40%, transparent 80%);
+    }
+
+    /* Custom Floating Tech Particles for continuous subtle motion */
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #7f5af0, #ef8354);
+      opacity: 0.12;
+      will-change: transform;
+    }
+
+    /* Timed Clip Structure */
+    .clip {
       position: absolute;
       inset: 0;
       display: flex;
       align-items: center;
-      justify-content: flex-start;
-      padding-left: 220px;
-      overflow: hidden;
-      transform: translate3d(0, 0, 0);
-      backface-visibility: hidden;
-    }
-
-    .preview-pending-motion::before {
-      position: absolute;
-      inset: 0;
+      justify-content: center;
+      opacity: 0;
+      visibility: hidden;
       pointer-events: none;
-      content: "";
-      background:
-        linear-gradient(90deg, rgb(251 250 247 / 0.94) 0%, rgb(251 250 247 / 0.78) 42%, transparent 78%),
-        linear-gradient(180deg, rgb(255 255 255 / 0.72), transparent 48%);
-    }
-
-    .preview-pending-grid {
-      position: absolute;
-      inset: 0;
-      pointer-events: none;
-      opacity: 0.72;
-      background-image:
-        linear-gradient(90deg, rgb(110 99 255 / 0.08) 1px, transparent 1px),
-        linear-gradient(180deg, rgb(110 99 255 / 0.08) 1px, transparent 1px);
-      background-size: 72px 72px;
-      mask-image: radial-gradient(ellipse at center, black 0%, transparent 72%);
-    }
-
-    .preview-pending-content {
-      position: relative;
-      z-index: 2;
-      width: 620px;
-      display: flex;
-      flex-direction: column;
-      align-items: flex-start;
-      padding: 56px;
-      border: 1px solid #e7e3ee;
-      border-radius: 8px;
-      background: rgb(255 255 255 / 0.84);
-      box-shadow:
-        0 34px 90px rgb(24 22 29 / 0.12),
-        0 10px 28px rgb(24 22 29 / 0.06),
-        inset 0 0 0 1px rgb(255 255 255 / 0.72);
-      backdrop-filter: blur(18px);
+      z-index: 10;
       will-change: transform, opacity;
     }
 
-    .preview-pending-status {
-      display: inline-flex;
-      align-items: center;
-      gap: 10px;
-      padding: 9px 12px;
-      border: 1px solid #d7c9ff;
-      border-radius: 999px;
-      background: #efe8ff;
-      color: #5d3fd3;
-      font-size: 15px;
-      font-weight: 700;
-      letter-spacing: 0.04em;
-      line-height: 1;
-      text-transform: uppercase;
-    }
-
-    .preview-pending-dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 999px;
-      background: #6e63ff;
-      box-shadow: 0 0 24px rgb(110 99 255 / 0.5);
-    }
-
-    .preview-pending-title {
-      max-width: 560px;
-      margin-top: 24px;
-      color: #050505;
-      font-size: 58px;
-      font-weight: 760;
-      letter-spacing: 0;
-      line-height: 0.98;
-    }
-
-    .preview-pending-subtitle {
-      max-width: 430px;
-      margin-top: 14px;
-      color: #6f6a78;
-      font-size: 20px;
-      font-weight: 500;
-      letter-spacing: 0;
-      line-height: 1.35;
-    }
-
-    .preview-pending-progress {
-      width: 360px;
-      height: 6px;
-      margin-top: 32px;
-      overflow: hidden;
-      border-radius: 999px;
-      background: #ece7f4;
-    }
-
-    .preview-pending-progress span {
-      display: block;
+    /* Scene-Specific Styling */
+    .scene-content {
+      position: relative;
       width: 100%;
       height: 100%;
-      transform-origin: left center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      padding: 0 120px;
+    }
+
+    /* Common typography rules */
+    .title-large {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 82px;
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.02em;
+      color: #ffffff;
+      text-align: center;
+      text-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+      text-wrap: balance;
+    }
+
+    .title-large span.highlight {
+      background: linear-gradient(90deg, #9b86ff, #ff8a65);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    /* Distinct class to resolve headless gradient clipping issues */
+    .highlight-ph {
+      background: linear-gradient(90deg, #ff8a65, #da552f);
+      -webkit-background-clip: text !important;
+      -webkit-text-fill-color: transparent !important;
+      display: inline-block;
+    }
+
+    .subtitle-medium {
+      font-family: 'Inter', sans-serif;
+      font-size: 32px;
+      font-weight: 500;
+      color: #94a1b2;
+      margin-top: 32px;
+      text-align: center;
+      text-wrap: balance;
+      max-width: 1200px;
+    }
+
+    /* SCENE 1: The Problem (Cart Abandonment) */
+    .scene-problem {
+      background: radial-gradient(circle at 50% 50%, #150f24 0%, #09080f 100%);
+    }
+
+    .problem-visual-container {
+      position: relative;
+      width: 320px;
+      height: 320px;
+      margin-bottom: 48px;
+    }
+
+    .large-cart-icon {
+      width: 100%;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 15px 35px rgba(127, 90, 240, 0.3));
+    }
+
+    .cart-cracks {
+      position: absolute;
+      inset: 0;
+      stroke: #ef476f;
+      stroke-width: 4;
+      stroke-linecap: round;
+      fill: none;
+      opacity: 0;
+      filter: drop-shadow(0 0 8px rgba(239, 71, 111, 0.6));
+    }
+
+    .stat-badge {
+      position: absolute;
+      bottom: -10px;
+      right: -20px;
+      background: linear-gradient(135deg, #ef476f, #ff6b6b);
+      color: #ffffff;
+      padding: 14px 24px;
+      border-radius: 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 46px;
+      font-weight: 800;
+      box-shadow: 0 15px 30px rgba(239, 71, 111, 0.4);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      will-change: transform, opacity;
+    }
+
+    /* SCENE 2: The Shopify Connection */
+    .scene-integration {
+      background: radial-gradient(circle at 50% 50%, #0c1214 0%, #09080f 100%);
+    }
+
+    .connection-grid {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 120px;
+      width: 100%;
+      margin-top: 60px;
+    }
+
+    .connect-card {
+      width: 380px;
+      height: 260px;
+      background: rgba(22, 22, 26, 0.7);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.3);
+      backdrop-filter: blur(12px);
+      position: relative;
+      will-change: transform;
+    }
+
+    .connect-card.shopify-card {
+      border-color: rgba(149, 191, 71, 0.25);
+    }
+
+    .connect-card.venture-card {
+      border-color: rgba(127, 90, 240, 0.25);
+    }
+
+    .logo-img {
+      height: 110px;
+      object-fit: contain;
+    }
+
+    .custom-venture-logo {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 16px;
+    }
+
+    .connect-card-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 26px;
+      font-weight: 700;
+      margin-top: 24px;
+      color: #ffffff;
+    }
+
+    .connector-line-container {
+      position: relative;
+      width: 240px;
+      height: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .connector-path {
+      width: 100%;
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 999px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .connector-pulse {
+      position: absolute;
+      top: 0;
+      left: -50px;
+      width: 100px;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, #7f5af0, #00ffd0, transparent);
       border-radius: inherit;
-      background: linear-gradient(90deg, #6e63ff, #a98bff);
+    }
+
+    .connection-badge {
+      position: absolute;
+      top: -36px;
+      background: #00ffd0;
+      color: #09080f;
+      padding: 8px 20px;
+      border-radius: 999px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 800;
+      letter-spacing: 0.08em;
+      box-shadow: 0 0 20px rgba(0, 255, 208, 0.4);
+      opacity: 0;
+      transform: scale(0.6);
+    }
+
+    /* SCENE 3: Product Demo (Cart Drawer Mockup) */
+    .scene-demo {
+      background: radial-gradient(circle at 50% 50%, #10101a 0%, #09080f 100%);
+    }
+
+    .demo-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+      max-width: 1480px;
+      height: 640px;
+      margin-top: 40px;
+      gap: 60px;
+    }
+
+    /* Left Side: Product Details Column */
+    .product-left-panel {
+      flex: 1;
+      height: 100%;
+      background: rgba(22, 22, 26, 0.5);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+      border-radius: 24px;
+      padding: 48px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      box-shadow: 0 25px 50px rgba(0, 0, 0, 0.2);
+      will-change: transform;
+    }
+
+    .store-breadcrumbs {
+      font-size: 16px;
+      color: #72757e;
+      text-transform: uppercase;
+      letter-spacing: 0.1em;
+      margin-bottom: 16px;
+    }
+
+    .product-hero-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 54px;
+      font-weight: 800;
+      color: #ffffff;
+      line-height: 1.1;
+      margin-bottom: 20px;
+    }
+
+    .product-price {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 38px;
+      font-weight: 700;
+      color: #7f5af0;
+      margin-bottom: 32px;
+    }
+
+    .product-desc {
+      font-size: 18px;
+      color: #94a1b2;
+      line-height: 1.6;
+      margin-bottom: 40px;
+    }
+
+    .atc-main-btn {
+      width: 100%;
+      max-width: 320px;
+      height: 64px;
+      background: #ffffff;
+      color: #09080f;
+      border: none;
+      border-radius: 16px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 20px;
+      font-weight: 700;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      box-shadow: 0 15px 35px rgba(255, 255, 255, 0.15);
+    }
+
+    /* Right Side: Sleek Browser / Cart Drawer UI */
+    .browser-window {
+      width: 640px;
+      height: 100%;
+      background: #16161a;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 24px;
+      overflow: hidden;
+      box-shadow: 0 35px 75px rgba(0, 0, 0, 0.4);
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      will-change: transform;
+    }
+
+    .browser-header {
+      height: 48px;
+      background: #0f0e11;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding: 0 24px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .browser-dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+    }
+
+    .dot-red { background: #ff5f56; }
+    .dot-yellow { background: #ffbd2e; }
+    .dot-green { background: #27c93f; }
+
+    .browser-address {
+      margin-left: 24px;
+      height: 28px;
+      flex: 1;
+      background: rgba(255, 255, 255, 0.04);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      padding-left: 16px;
+      font-size: 13px;
+      color: #72757e;
+    }
+
+    .browser-body {
+      flex: 1;
+      background: #111115;
+      position: relative;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    /* Slide-out Cart Drawer Panel */
+    .cart-drawer {
+      width: 440px;
+      height: 100%;
+      background: #16161a;
+      border-left: 1px solid rgba(255, 255, 255, 0.08);
+      padding: 32px;
+      display: flex;
+      flex-direction: column;
+      z-index: 10;
+      position: absolute;
+      top: 0;
+      right: 0;
+      box-shadow: -15px 0 35px rgba(0, 0, 0, 0.3);
+      will-change: transform;
+    }
+
+    .cart-drawer-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+
+    .cart-drawer-title {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 22px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Interactive Progress Bar (Gamified milestones) */
+    .progress-milestone-box {
+      background: rgba(127, 90, 240, 0.05);
+      border: 1px solid rgba(127, 90, 240, 0.12);
+      border-radius: 16px;
+      padding: 16px 20px;
+      margin-bottom: 24px;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .progress-bar-label {
+      font-size: 14px;
+      color: #94a1b2;
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .progress-bar-label strong {
+      color: #ffffff;
+    }
+
+    .progress-track {
+      width: 100%;
+      height: 10px;
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 999px;
+      overflow: hidden;
+    }
+
+    .progress-fill {
+      width: 75%; /* Start at 75% ($45 / $60) */
+      height: 100%;
+      background: linear-gradient(90deg, #7f5af0, #a98bff);
+      border-radius: inherit;
+      will-change: width, background;
+    }
+
+    /* Cart Items list */
+    .cart-items-list {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      overflow-y: auto;
+    }
+
+    .cart-item-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-bottom: 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .cart-item-details {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .cart-item-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .cart-item-qty {
+      font-size: 13px;
+      color: #72757e;
+    }
+
+    .cart-item-price {
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+    }
+
+    /* Smart Upsell Box inside Drawer */
+    .smart-upsell-container {
+      background: rgba(239, 131, 84, 0.05);
+      border: 1px dashed rgba(239, 131, 84, 0.25);
+      border-radius: 16px;
+      padding: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      will-change: transform, opacity;
+    }
+
+    .upsell-info {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      max-width: 220px;
+    }
+
+    .upsell-tag {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 11px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: #ef8354;
+    }
+
+    .upsell-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+    }
+
+    .upsell-price {
+      font-size: 14px;
+      font-weight: 700;
+      color: #ef8354;
+    }
+
+    .add-upsell-btn {
+      background: #ef8354;
+      color: #09080f;
+      border: none;
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 13px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 5px 15px rgba(239, 131, 84, 0.2);
+      transition: background 0.2s;
+    }
+
+    /* Checkout CTA inside Drawer */
+    .drawer-checkout-box {
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      padding-top: 20px;
+    }
+
+    .drawer-total-row {
+      display: flex;
+      justify-content: space-between;
+      font-size: 18px;
+      font-weight: 700;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    .drawer-checkout-btn {
+      width: 100%;
+      height: 52px;
+      background: #7f5af0;
+      color: #ffffff;
+      border: none;
+      border-radius: 12px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(127, 90, 240, 0.25);
+    }
+
+    /* Precise Targeted Mouse Cursor */
+    .cursor {
+      position: absolute;
+      width: 48px;
+      height: 48px;
+      pointer-events: none;
+      z-index: 9999;
+      top: 0;
+      left: 0;
+      will-change: transform;
+    }
+
+    .cursor-tap-effect {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: 3px solid #00ffd0;
+      background: rgba(0, 255, 208, 0.15);
+      transform: scale(0);
+      opacity: 0;
+      left: -8px;
+      top: -8px;
+      pointer-events: none;
+    }
+
+    /* SCENE 4: Metrics Screen */
+    .scene-metric {
+      background: radial-gradient(circle at 50% 50%, #0c141d 0%, #09080f 100%);
+    }
+
+    .metric-hero-box {
+      background: rgba(22, 22, 26, 0.6);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      border-radius: 36px;
+      padding: 60px 100px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      box-shadow: 0 35px 85px rgba(0, 0, 0, 0.4);
+      backdrop-filter: blur(16px);
+      position: relative;
+      overflow: hidden;
+      will-change: transform;
+    }
+
+    .metric-number {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 160px;
+      font-weight: 800;
+      line-height: 1;
+      background: linear-gradient(135deg, #00ffd0, #7f5af0);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      filter: drop-shadow(0 15px 30px rgba(127, 90, 240, 0.25));
+      margin-bottom: 12px;
+      will-change: transform;
+    }
+
+    .metric-label {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 28px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 0.15em;
+      color: #ffffff;
+      margin-bottom: 16px;
+    }
+
+    /* Rising metric trend chart line */
+    .metric-chart-svg {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      width: 100%;
+      height: 120px;
+      pointer-events: none;
+      opacity: 0.25;
+    }
+
+    .chart-path {
+      stroke: url(#chart-grad);
+      stroke-width: 6;
+      stroke-linecap: round;
+      fill: none;
+      will-change: stroke-dashoffset;
+    }
+
+    /* SCENE 5: Product Hunt Outro */
+    .scene-outro {
+      background: radial-gradient(circle at 50% 50%, #291410 0%, #09080f 100%);
+    }
+
+    .ph-logo-wrapper {
+      position: relative;
+      width: 200px;
+      height: 200px;
+      margin-bottom: 40px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      will-change: transform;
+    }
+
+    .ph-logo-img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      filter: drop-shadow(0 15px 35px rgba(218, 85, 47, 0.45));
+      will-change: transform;
+    }
+
+    .ph-stars-container {
+      position: absolute;
+      inset: -50px;
+      pointer-events: none;
+    }
+
+    .ph-star-svg {
+      position: absolute;
+      width: 32px;
+      height: 32px;
+      fill: #ffd500;
+      will-change: transform, opacity;
+      filter: drop-shadow(0 0 8px rgba(255, 213, 0, 0.5));
+    }
+
+    /* Outro CTA button */
+    .outro-vote-btn {
+      margin-top: 48px;
+      height: 72px;
+      padding: 0 48px;
+      background: #da552f;
+      color: #ffffff;
+      border: none;
+      border-radius: 20px;
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      font-size: 24px;
+      font-weight: 800;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      box-shadow: 0 20px 45px rgba(218, 85, 47, 0.4);
+      position: relative;
+      overflow: hidden;
+      will-change: transform, box-shadow;
+    }
+
+    .outro-vote-btn::before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+      transform: translateX(-100%);
+    }
+
+    .ph-btn-kitty-icon {
+      width: 32px;
+      height: 32px;
+      fill: #ffffff;
     }
   </style>
 </head>
 <body>
+
+  <!-- ROOT COMPOSITION ELEMENT -->
   <div
     id="stage"
     data-composition-id="Main"
     data-start="0"
-    data-duration="11.667"
+    data-duration="27.0"
     data-width="1920"
     data-height="1080"
     data-motionabl-fps="30"
   >
-    <div
-      id="preview-pending"
-      class="clip preview-pending-motion"
-      data-start="0"
-      data-duration="11.667"
-      data-track-index="0"
-    >
-      <div class="preview-pending-grid" aria-hidden="true"></div>
-      <div class="preview-pending-content">
-        <div class="preview-pending-status">
-          <span class="preview-pending-dot"></span>
-          <span>Preview</span>
+
+    <!-- Background Audio & SFX Assets (Preloaded, Declared with Query Suffixes) -->
+    <audio id="bg-music" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/music/1780410388027_nwc9bvwivg9_music_Upbeat_corporate_ele.mp3" preload="auto" data-start="0" data-duration="27" data-track-index="2" data-volume="0.15"></audio>
+    
+    <!-- Narrations -->
+    <audio id="vo-1" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/audio/1780410340670_55ztuts052v_TX3LPaxm_Seventy_percent_of_e.mp3" preload="auto" data-start="0.3" data-duration="3.239" data-track-index="3" data-volume="1.0"></audio>
+    <audio id="vo-2" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/audio/1780410349140_ve77jfs7588_TX3LPaxm_But_your_Shopify_sto.mp3" preload="auto" data-start="4.3" data-duration="4.362" data-track-index="3" data-volume="1.0"></audio>
+    <audio id="vo-3" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/audio/1780410357073_isqc5x8ezid_TX3LPaxm_Gamify_your_cart__Bo.mp3" preload="auto" data-start="9.3" data-duration="6.530" data-track-index="3" data-volume="1.0"></audio>
+    <audio id="vo-4" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/audio/1780410361830_x6eitychpz8_TX3LPaxm_Watch_your_average_o.mp3" preload="auto" data-start="16.3" data-duration="4.441" data-track-index="3" data-volume="1.0"></audio>
+    <audio id="vo-5" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/audio/1780410366671_kfgtgaf0gi_TX3LPaxm_We_are_live_on_Produ.mp3" preload="auto" data-start="21.3" data-duration="4.598" data-track-index="3" data-volume="1.0"></audio>
+    
+    <!-- Sound Effects -->
+    <audio id="sfx-whoosh-1" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780410393187_6q5wnb3zf5a_sfx_Subtle_digital_tech_whoosh_tra.mp3?clip=1" preload="auto" data-start="3.8" data-duration="2.0" data-track-index="4" data-volume="0.4"></audio>
+    <audio id="sfx-whoosh-2" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780410393187_6q5wnb3zf5a_sfx_Subtle_digital_tech_whoosh_tra.mp3?clip=2" preload="auto" data-start="8.8" data-duration="2.0" data-track-index="4" data-volume="0.4"></audio>
+    <audio id="sfx-whoosh-3" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780410393187_6q5wnb3zf5a_sfx_Subtle_digital_tech_whoosh_tra.mp3?clip=3" preload="auto" data-start="15.8" data-duration="2.0" data-track-index="4" data-volume="0.4"></audio>
+    <audio id="sfx-whoosh-4" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780410393187_6q5wnb3zf5a_sfx_Subtle_digital_tech_whoosh_tra.mp3?clip=4" preload="auto" data-start="20.8" data-duration="2.0" data-track-index="4" data-volume="0.4"></audio>
+    
+    <audio id="sfx-success" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/sfx/1780410396626_a0mlhnt6wrn_sfx_Clean_digital_high_end_success.mp3" preload="auto" data-start="12.9" data-duration="3.0" data-track-index="5" data-volume="0.6"></audio>
+
+
+    <!-- Shared Ambient Atmosphere -->
+    <div class="ambient-bg" aria-hidden="true" style="z-index: 2;">
+      <div class="ambient-grid"></div>
+      <div class="ambient-glow-1"></div>
+      <div class="ambient-glow-2"></div>
+      <!-- Dynamically generated floating background circles for continuous secondary visual energy -->
+      <div class="particle" style="width: 14px; height: 14px; top: 15%; left: 8%; opacity: 0.15;"></div>
+      <div class="particle" style="width: 24px; height: 24px; top: 78%; left: 12%; opacity: 0.08;"></div>
+      <div class="particle" style="width: 18px; height: 18px; top: 22%; right: 10%; opacity: 0.12;"></div>
+      <div class="particle" style="width: 32px; height: 32px; top: 82%; right: 15%; opacity: 0.06;"></div>
+    </div>
+
+
+    <!-- ==========================================
+         BEAT 1: THE PROBLEM (0.0s - 4.0s)
+         ========================================== -->
+    <div class="clip scene-problem" data-start="0" data-duration="4.0" data-track-index="1">
+      <div class="scene-content">
+        <div class="problem-visual-container">
+          <!-- Beautiful crackable e-commerce cart icon -->
+          <div class="large-cart-icon">
+            <svg width="240" height="240" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M2.25 2.25H3.75L4.85 14.53C4.94 15.53 5.78 16.29 6.78 16.29H17.22C18.22 16.29 19.06 15.53 19.15 14.53L19.92 6H5.25" stroke="#7f5af0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <circle cx="9" cy="20" r="1.5" fill="#7f5af0"/>
+              <circle cx="16" cy="20" r="1.5" fill="#7f5af0"/>
+            </svg>
+          </div>
+          <svg class="cart-cracks" viewBox="0 0 100 100">
+            <path d="M 45 35 L 52 48 L 48 55 L 58 68" />
+            <path d="M 60 28 L 52 48 L 56 62" />
+          </svg>
+          <div class="stat-badge">70% ABANDONED</div>
         </div>
-        <div class="preview-pending-title">Preparing preview</div>
-        <div class="preview-pending-subtitle">
-          Generated motion will appear here when ready.
-        </div>
-        <div class="preview-pending-progress" aria-hidden="true">
-          <span></span>
+        <h1 class="title-large p-title">
+          Shopping Carts are <span class="highlight">Abandoned</span>
+        </h1>
+        <p class="subtitle-medium p-subtitle">
+          Stop losing e-commerce revenue. Turn browsers into buyers.
+        </p>
+      </div>
+    </div>
+
+
+    <!-- ==========================================
+         BEAT 2: THE SHOPIFY CONNECTION (4.0s - 9.0s)
+         ========================================== -->
+    <div class="clip scene-integration" data-start="4.0" data-duration="5.0" data-track-index="1">
+      <div class="scene-content">
+        <h1 class="title-large i-title">
+          Connect with <span class="highlight">One Click</span>
+        </h1>
+        <p class="subtitle-medium i-subtitle">
+          Direct native integration. Launch Cart-Venture on Shopify in seconds.
+        </p>
+        
+        <div class="connection-grid">
+          <!-- Shopify Side -->
+          <div class="connect-card shopify-card">
+            <img class="logo-img" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/chat-images/1780410262745_cm5gqcsxph6_shopify_logo.png" alt="Shopify Logo" />
+            <div class="connect-card-title">SHOPIFY</div>
+          </div>
+          
+          <!-- Animated Middle Connector -->
+          <div class="connector-line-container">
+            <div class="connector-path">
+              <div class="connector-pulse"></div>
+            </div>
+            <div class="connection-badge">CONNECTED</div>
+          </div>
+          
+          <!-- Cart-Venture Side -->
+          <div class="connect-card venture-card">
+            <div class="custom-venture-logo">
+              <!-- Custom designed glowing portal logo -->
+              <svg width="100" height="100" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="2" y="2" width="20" height="20" rx="6" fill="url(#venture-grad)" />
+                <path d="M6 8H7.5L8.5 15H15.5L16.2 9H9.5" stroke="#ffffff" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+                <circle cx="10" cy="18" r="1" fill="#ffffff"/>
+                <circle cx="14" cy="18" r="1" fill="#ffffff"/>
+                <path d="M11 6L14 9L11 12" stroke="#00ffd0" stroke-width="2" stroke-linecap="round"/>
+                <defs>
+                  <linearGradient id="venture-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+                    <stop offset="0%" stop-color="#7f5af0" />
+                    <stop offset="100%" stop-color="#ff6e4a" />
+                  </linearGradient>
+                </defs>
+              </svg>
+            </div>
+            <div class="connect-card-title">CART-VENTURE</div>
+          </div>
         </div>
       </div>
     </div>
+
+
+    <!-- ==========================================
+         BEAT 3: INTERACTIVE DEMO (9.0s - 16.0s)
+         ========================================== -->
+    <div class="clip scene-demo" data-start="9.0" data-duration="7.0" data-track-index="1">
+      <div class="scene-content">
+        <h1 class="title-large d-title">
+          Gamify the <span class="highlight">Cart Experience</span>
+        </h1>
+        
+        <div class="demo-wrapper">
+          <!-- Left product view -->
+          <div class="product-left-panel">
+            <div class="store-breadcrumbs">Gear / Travel</div>
+            <h2 class="product-hero-title">Adventure Backpack</h2>
+            <div class="product-price">$45.00</div>
+            <p class="product-desc">
+              Waterproof ripstop nylon, magnetic utility straps, and expandable storage. Ready for your next journey.
+            </p>
+            <button class="atc-main-btn" disabled>
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M5 12h14M12 5l7 7-7 7"/></svg>
+              <span>Added to Cart</span>
+            </button>
+          </div>
+
+          <!-- Right Browser with drawer slideout -->
+          <div class="browser-window">
+            <div class="browser-header">
+              <span class="browser-dot dot-red"></span>
+              <span class="browser-dot dot-yellow"></span>
+              <span class="browser-dot dot-green"></span>
+              <div class="browser-address">https://youradventurestore.com/checkout</div>
+            </div>
+            
+            <div class="browser-body">
+              <!-- Cart Drawer slideout panel -->
+              <div class="cart-drawer">
+                <div class="cart-drawer-header">
+                  <span class="cart-drawer-title">Shopping Cart (1)</span>
+                  <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="#72757e" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>
+                </div>
+
+                <!-- Interactive Progress milestone -->
+                <div class="progress-milestone-box">
+                  <div class="progress-bar-label">
+                    <span class="shipping-msg">Spend <strong>$15.00</strong> more for Free Shipping</span>
+                    <span class="shipping-percent">75%</span>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill"></div>
+                  </div>
+                </div>
+
+                <!-- Items Row -->
+                <div class="cart-items-list">
+                  <div class="cart-item-row item-backpack">
+                    <div class="cart-item-details">
+                      <span class="cart-item-name">Adventure Backpack</span>
+                      <span class="cart-item-qty">Qty: 1</span>
+                    </div>
+                    <span class="cart-item-price">$45.00</span>
+                  </div>
+                  
+                  <!-- Dynamic Item Row that animates in after click -->
+                  <div class="cart-item-row item-stickers" style="display: none; opacity: 0; height: 0; padding: 0; border-bottom: none;">
+                    <div class="cart-item-details">
+                      <span class="cart-item-name">Adventure Sticker Pack</span>
+                      <span class="cart-item-qty">Qty: 1</span>
+                    </div>
+                    <span class="cart-item-price">$15.00</span>
+                  </div>
+                </div>
+
+                <!-- Intelligent Cart Drawer Upsell Card -->
+                <div class="smart-upsell-container">
+                  <div class="upsell-info">
+                    <span class="upsell-tag">SMART UP-SELL</span>
+                    <span class="upsell-name">Adventure Stickers</span>
+                    <span class="upsell-price">+$15.00</span>
+                  </div>
+                  <button class="add-upsell-btn" data-target="add-upsell">ADD</button>
+                </div>
+
+                <!-- Total Column & Checkout -->
+                <div class="drawer-checkout-box">
+                  <div class="drawer-total-row">
+                    <span>Total</span>
+                    <span class="cart-total-price">$45.00</span>
+                  </div>
+                  <button class="drawer-checkout-btn">Checkout</button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Custom Mouse Cursor Element -->
+        <div class="cursor" aria-hidden="true">
+          <!-- Tap Bubble Effect -->
+          <div class="cursor-tap-effect"></div>
+          <!-- Realistic mouse pointer SVG -->
+          <svg width="34" height="34" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" style="filter: drop-shadow(0 3px 10px rgba(0,0,0,0.5));">
+            <path d="M4.5 3V19.5L9.67 14.33L16.5 21.17L19.5 18.17L12.67 11.33H19.5L4.5 3Z" fill="#ffffff" stroke="#000000" stroke-width="1.5" stroke-linejoin="round"/>
+          </svg>
+        </div>
+
+      </div>
+    </div>
+
+
+    <!-- ==========================================
+         BEAT 4: GROWING METRIC (16.0s - 21.0s)
+         ========================================== -->
+    <div class="clip scene-metric" data-start="16.0" data-duration="5.0" data-track-index="1">
+      <div class="scene-content">
+        <h1 class="title-large m-title" style="margin-bottom: 40px;">
+          Proven <span class="highlight">Store Growth</span>
+        </h1>
+        
+        <div class="metric-hero-box">
+          <div class="metric-number">+24%</div>
+          <div class="metric-label">AVERAGE ORDER VALUE</div>
+          <p class="subtitle-medium m-subtitle" style="margin-top: 0; font-size: 24px; max-width: 500px;">
+            Gamified progression transforms shopper psychology on autopilot.
+          </p>
+          
+          <!-- Rising neon vector line graph -->
+          <svg class="metric-chart-svg" viewBox="0 0 500 120" preserveAspectRatio="none">
+            <defs>
+              <linearGradient id="chart-grad" x1="0%" y1="0%" x2="100%" y2="0%">
+                <stop offset="0%" stop-color="#7f5af0" />
+                <stop offset="100%" stop-color="#00ffd0" />
+              </linearGradient>
+            </defs>
+            <path class="chart-path" d="M 0 100 Q 120 90 250 50 T 500 10" />
+          </svg>
+        </div>
+      </div>
+    </div>
+
+
+    <!-- ==========================================
+         BEAT 5: PRODUCT HUNT OUTRO (21.0s - 27.0s)
+         ========================================== -->
+    <div class="clip scene-outro" data-start="21.0" data-duration="6.0" data-track-index="1">
+      <div class="scene-content">
+        <div class="ph-logo-wrapper">
+          <!-- Star decorations around the logo -->
+          <div class="ph-stars-container">
+            <svg class="ph-star-svg s-1" style="top: 10%; left: 10%;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="ph-star-svg s-2" style="top: -20%; left: 45%; scale: 1.2;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="ph-star-svg s-3" style="top: 10%; right: 5%;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="ph-star-svg s-4" style="bottom: 15%; left: -10%;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+            <svg class="ph-star-svg s-5" style="bottom: 10%; right: -10%; scale: 1.1;" viewBox="0 0 24 24"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
+          </div>
+          <!-- Product Hunt Logo (Image 2) -->
+          <img class="ph-logo-img" src="https://pub-e3bfc0083b0644b296a7080b21024c5f.r2.dev/chat-images/1780410263201_4vaf1g0vjcs_product_hunt.png" alt="Product Hunt Logo" />
+        </div>
+        
+        <h1 class="title-large o-title">
+          We are <span class="highlight-ph">LIVE</span> on Product Hunt!
+        </h1>
+        <p class="subtitle-medium o-subtitle">
+          Join the venture today. Help us optimize shopping carts for every merchant.
+        </p>
+        
+        <button class="outro-vote-btn">
+          <!-- Product Hunt official P kitten mark rendered as path inside button -->
+          <svg class="ph-btn-kitty-icon" viewBox="0 0 40 40" xmlns="http://www.w3.org/2000/svg">
+            <path d="M20 0C8.954 0 0 8.954 0 20s8.954 20 20 20 20-8.954 20-20S31.046 0 20 0zm4.232 26.666h-3.414v-6.828h-1.636v6.828h-3.414V13.334h5.05c3.784 0 6.828 3.044 6.828 6.828v6.504z" />
+          </svg>
+          <span>VOTE ON PRODUCT HUNT</span>
+        </button>
+      </div>
+    </div>
+
   </div>
 
+  <!-- Master Animation Engine -->
   <script src="./vendor/gsap.min.js"></script>
   <script>
+    // Ensure timeline registration works reliably
     window.__timelines = window.__timelines || {};
+    
+    // Create seekable paused GSAP timeline
+    const tl = gsap.timeline({ paused: true });
 
-    const timeline = gsap.timeline({ paused: true });
-    timeline.from(".preview-pending-content", {
+    // Global ambient background slow animation
+    tl.to(".ambient-glow-1", {
+      x: "-=100",
+      y: "+=120",
+      duration: 27,
+      ease: "sine.inOut"
+    }, 0);
+    tl.to(".ambient-glow-2", {
+      x: "+=150",
+      y: "-=80",
+      duration: 27,
+      ease: "sine.inOut"
+    }, 0);
+    
+    // Slowly float our background visual noise particles
+    gsap.utils.toArray(".particle").forEach((p, i) => {
+      tl.to(p, {
+        y: "+=40",
+        x: "-=20",
+        rotation: 360,
+        duration: 27,
+        ease: "sine.inOut"
+      }, 0);
+    });
+
+    // ==========================================
+    // BEAT 1 TIMELINE (0s - 4s)
+    // ==========================================
+    tl.set(".scene-problem", { autoAlpha: 1, pointerEvents: "auto" }, 0);
+    
+    // Large cart drops in and bounces with anticipation/overshoot
+    tl.from(".large-cart-icon", {
+      y: -500,
+      scaleY: 0.7,
+      duration: 1.2,
+      ease: "back.out(1.4)"
+    }, 0.2);
+    
+    // Crack on the cart pops in with red glowing highlight
+    tl.to(".cart-cracks", {
+      opacity: 1,
+      duration: 0.15,
+      ease: "power2.out"
+    }, 1.3);
+    
+    // Problem stats tag pops in with spring bounce
+    tl.from(".stat-badge", {
+      scale: 0,
+      rotation: -15,
       opacity: 0,
-      y: 34,
-      scale: 0.98,
+      duration: 0.65,
+      ease: "elastic.out(1, 0.45)"
+    }, 1.45);
+
+    // Staggered title words reveal
+    tl.from(".p-title", {
+      y: 40,
+      opacity: 0,
       duration: 0.8,
-      ease: "power4.out",
-    }, 0);
-    timeline.from(".preview-pending-grid", {
+      ease: "power3.out"
+    }, 0.6);
+    tl.from(".p-subtitle", {
+      y: 30,
       opacity: 0,
-      scale: 1.08,
-      duration: 1.1,
-      ease: "power3.out",
-    }, 0);
-    timeline.to(".preview-pending-dot", {
-      opacity: 0.35,
-      duration: 0.9,
-      yoyo: true,
-      repeat: 10,
-      ease: "sine.inOut",
-    }, 0.25);
-    timeline.fromTo(".preview-pending-progress span", {
-      scaleX: 0.08,
+      duration: 0.8,
+      ease: "power3.out"
+    }, 0.95);
+
+    // Cinematic camera depth push-out to Scene 2
+    tl.to(".scene-problem", {
+      opacity: 0,
+      scale: 1.12,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 3.8);
+
+
+    // ==========================================
+    // BEAT 2 TIMELINE (4s - 9s)
+    // ==========================================
+    tl.set(".scene-integration", { autoAlpha: 1, pointerEvents: "auto" }, 3.8);
+    tl.fromTo(".scene-integration", {
+      opacity: 0,
+      scale: 0.88
     }, {
-      scaleX: 0.82,
-      duration: 5.8,
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 3.8);
+
+    // Titles reveal
+    tl.from(".i-title", {
+      y: 35,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 4.4);
+    tl.from(".i-subtitle", {
+      y: 25,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 4.7);
+
+    // Cards glide in from sides
+    tl.from(".shopify-card", {
+      x: -400,
+      opacity: 0,
+      rotation: -8,
+      duration: 1.0,
+      ease: "power3.out"
+    }, 4.9);
+    tl.from(".venture-card", {
+      x: 400,
+      opacity: 0,
+      rotation: 8,
+      duration: 1.0,
+      ease: "power3.out"
+    }, 4.9);
+
+    // Connector path draws
+    tl.from(".connector-path", {
+      scaleX: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    }, 5.5);
+
+    // Energy pulse moves from left (Shopify) to right (Venture)
+    tl.to(".connector-pulse", {
+      left: "100%",
+      duration: 0.8,
+      ease: "power1.inOut"
+    }, 5.75);
+
+    // Connection success badge pops in with bounce
+    tl.to(".connection-badge", {
+      opacity: 1,
+      scale: 1,
+      duration: 0.55,
+      ease: "back.out(2)"
+    }, 6.3);
+
+    // Dynamic glow pulse on connected cards
+    tl.to(".shopify-card", {
+      boxShadow: "0 25px 60px rgba(149, 191, 71, 0.22)",
+      borderColor: "rgba(149, 191, 71, 0.6)",
+      duration: 0.4,
+      ease: "power2.out"
+    }, 6.3);
+    tl.to(".venture-card", {
+      boxShadow: "0 25px 60px rgba(127, 90, 240, 0.22)",
+      borderColor: "rgba(127, 90, 240, 0.6)",
+      duration: 0.4,
+      ease: "power2.out"
+    }, 6.3);
+
+    // Gentle floating motion during the hold frame - START AFTER connection finishes to avoid conflicts
+    tl.to(".shopify-card", {
+      y: "-=16",
+      duration: 1.35,
       yoyo: true,
       repeat: 1,
-      ease: "power2.inOut",
-    }, 0.4);
-    timeline.to(".preview-pending-grid", {
-      opacity: 0.28,
-      duration: 0.001,
-      ease: "power1.out",
-    }, 11.667);
+      ease: "sine.inOut"
+    }, 6.3);
+    tl.to(".venture-card", {
+      y: "+=12",
+      duration: 1.35,
+      yoyo: true,
+      repeat: 1,
+      ease: "sine.inOut"
+    }, 6.3);
 
-    window.__timelines.Main = timeline;
+    // Cinematic camera depth push-out to Scene 3
+    tl.to(".scene-integration", {
+      opacity: 0,
+      scale: 1.12,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 8.8);
+
+
+    // ==========================================
+    // BEAT 3 TIMELINE (9s - 16s)
+    // ==========================================
+    tl.set(".scene-demo", { autoAlpha: 1, pointerEvents: "auto" }, 8.8);
+    tl.fromTo(".scene-demo", {
+      opacity: 0,
+      scale: 0.88
+    }, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 8.8);
+
+    // Header reveal
+    tl.from(".d-title", {
+      y: 35,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 9.4);
+
+    // Left product card details reveal
+    tl.from(".product-left-panel", {
+      x: -150,
+      opacity: 0,
+      duration: 0.85,
+      ease: "power3.out"
+    }, 9.6);
+
+    // Browser window mockup slides up
+    tl.from(".browser-window", {
+      y: 200,
+      opacity: 0,
+      duration: 1.0,
+      ease: "back.out(0.8)"
+    }, 9.6);
+
+    // Cart drawer slides out from the browser side
+    tl.from(".cart-drawer", {
+      xPercent: 100,
+      duration: 0.8,
+      ease: "power3.out"
+    }, 10.3);
+
+    // Gentle hold drift for browser and product card panels - START AFTER elements fully settle to avoid overwrite conflicts
+    tl.to(".browser-window", {
+      y: "-=10",
+      duration: 1.5,
+      yoyo: true,
+      repeat: 2,
+      ease: "sine.inOut"
+    }, 10.8);
+    tl.to(".product-left-panel", {
+      y: "+=8",
+      duration: 1.5,
+      yoyo: true,
+      repeat: 2,
+      ease: "sine.inOut"
+    }, 10.8);
+
+    // Helper to compute absolute cursor coordinates for our CTA click
+    function pointForTarget(targetSelector, containerSelector = "#stage", options = {}) {
+      const target = document.querySelector(targetSelector);
+      const container = document.querySelector(containerSelector);
+      if (!target || !container) return { x: 960, y: 540 }; // Fallback to stage center
+
+      const targetRect = target.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      
+      // Compute relative top/left
+      const x = targetRect.left - containerRect.left + targetRect.width * (options.xRatio ?? 0.5);
+      const y = targetRect.top - containerRect.top + targetRect.height * (options.yRatio ?? 0.5);
+
+      return {
+        x: x - (options.tipOffsetX ?? 0),
+        y: y - (options.tipOffsetY ?? 0),
+        target
+      };
+    }
+
+    // Dynamic Cursor Choreography using coordinates derived from actual element geometry
+    tl.add(() => {
+      const targetPoint = pointForTarget("[data-target='add-upsell']", "#stage", {
+        xRatio: 0.5,
+        yRatio: 0.5,
+        tipOffsetX: 4,
+        tipOffsetY: 2
+      });
+
+      // Animate custom cursor to targets
+      gsap.fromTo(".cursor", {
+        x: 350,
+        y: 850,
+        opacity: 0
+      }, {
+        x: targetPoint.x,
+        y: targetPoint.y,
+        opacity: 1,
+        duration: 1.4,
+        ease: "power3.inOut"
+      });
+    }, 11.2);
+
+    // Hover effect on the upsell ADD button as cursor arrives
+    tl.to("[data-target='add-upsell']", {
+      scale: 1.08,
+      backgroundColor: "#ff8a65",
+      duration: 0.2,
+      ease: "power1.out"
+    }, 12.45);
+
+    // Click trigger! (Rebound scale click click)
+    tl.to("[data-target='add-upsell']", {
+      scale: 0.9,
+      duration: 0.08,
+      ease: "power2.out"
+    }, 12.65);
+    tl.to("[data-target='add-upsell']", {
+      scale: 1,
+      duration: 0.15,
+      ease: "back.out(2)"
+    }, 12.73);
+
+    // Click Tap bubble shockwave ripple
+    tl.to(".cursor-tap-effect", {
+      scale: 1.8,
+      opacity: 1,
+      duration: 0.25,
+      ease: "power2.out"
+    }, 12.65);
+    tl.to(".cursor-tap-effect", {
+      opacity: 0,
+      duration: 0.2,
+      ease: "power1.in"
+    }, 12.9);
+
+    // Upsell card slides out / shrinks
+    tl.to(".smart-upsell-container", {
+      scale: 0.95,
+      opacity: 0,
+      height: 0,
+      marginBottom: 0,
+      padding: 0,
+      borderWidth: 0,
+      duration: 0.45,
+      ease: "power3.inOut"
+    }, 12.9);
+
+    // Added Stickers Item row slides open inside cart drawer
+    tl.set(".item-stickers", { display: "flex" }, 12.9);
+    tl.to(".item-stickers", {
+      height: "auto",
+      opacity: 1,
+      paddingBottom: 16,
+      borderBottom: "1px solid rgba(255, 255, 255, 0.05)",
+      duration: 0.45,
+      ease: "power3.out"
+    }, 12.95);
+
+    // Total price updates instantly
+    tl.add(() => {
+      document.querySelector(".cart-total-price").textContent = "$60.00";
+      document.querySelector(".cart-drawer-title").textContent = "Shopping Cart (2)";
+    }, 12.95);
+
+    // Milestone Progress fill completes to 100% with a glowing green highlight
+    tl.to(".progress-fill", {
+      width: "100%",
+      background: "linear-gradient(90deg, #00ffd0, #27c93f)",
+      duration: 0.8,
+      ease: "power3.out"
+    }, 13.0);
+
+    // Free shipping text updates in cart drawer
+    tl.to(".shipping-msg", {
+      opacity: 0,
+      duration: 0.2,
+      ease: "power1.in"
+    }, 12.95);
+    tl.add(() => {
+      document.querySelector(".shipping-msg").innerHTML = "🎉 <strong>Free Shipping Unlocked!</strong>";
+      document.querySelector(".shipping-percent").textContent = "100%";
+      document.querySelector(".shipping-percent").style.color = "#00ffd0";
+    }, 13.15);
+    tl.to(".shipping-msg", {
+      opacity: 1,
+      duration: 0.3,
+      ease: "power1.out"
+    }, 13.15);
+
+    // Checkout button gains active neon pulse shadow
+    tl.to(".drawer-checkout-btn", {
+      background: "#00ffd0",
+      color: "#09080f",
+      boxShadow: "0 12px 30px rgba(0, 255, 208, 0.35)",
+      duration: 0.4,
+      ease: "power2.out"
+    }, 13.15);
+
+    // Cursor leaves scene gracefully
+    tl.to(".cursor", {
+      x: "+=200",
+      y: "-=300",
+      opacity: 0,
+      duration: 1.0,
+      ease: "power3.in"
+    }, 13.6);
+
+    // Cinematic camera depth push-out to Scene 4
+    tl.to(".scene-demo", {
+      opacity: 0,
+      scale: 1.12,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 15.8);
+
+
+    // ==========================================
+    // BEAT 4 TIMELINE (16s - 21s)
+    // ==========================================
+    tl.set(".scene-metric", { autoAlpha: 1, pointerEvents: "auto" }, 15.8);
+    tl.fromTo(".scene-metric", {
+      opacity: 0,
+      scale: 0.88
+    }, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 15.8);
+
+    // Title reveal
+    tl.from(".m-title", {
+      y: 35,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 16.4);
+
+    // Metric box pops in with anticipation/overshoot
+    tl.from(".metric-hero-box", {
+      scale: 0.85,
+      opacity: 0,
+      duration: 1.0,
+      ease: "back.out(1.2)"
+    }, 16.6);
+
+    // Dynamic hold drift for metric box - START AFTER entry settles to avoid overwrite conflicts
+    tl.to(".metric-hero-box", {
+      y: "-=12",
+      duration: 1.5,
+      yoyo: true,
+      repeat: 1,
+      ease: "sine.inOut"
+    }, 17.8);
+
+    // AOV percentage numbers count up dynamically with high precision
+    const countObj = { value: 0 };
+    tl.to(countObj, {
+      value: 24,
+      duration: 2.2,
+      ease: "power3.out",
+      onUpdate: () => {
+        document.querySelector(".metric-number").textContent = `+${Math.floor(countObj.value)}%`;
+      }
+    }, 17.0);
+
+    // Scale up the metric slightly at the climax of counting
+    tl.from(".metric-number", {
+      scale: 0.9,
+      duration: 2.2,
+      ease: "power3.out"
+    }, 17.0);
+
+    // Glowing graph path draws smoothly in sync with count-up
+    tl.set(".chart-path", { strokeDasharray: 600, strokeDashoffset: 600 }, 16.8);
+    tl.to(".chart-path", {
+      strokeDashoffset: 0,
+      duration: 2.4,
+      ease: "power2.out"
+    }, 17.0);
+
+    // Metric description and labels stagger-fade in
+    tl.from(".metric-label", {
+      y: 15,
+      opacity: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    }, 17.4);
+    tl.from(".m-subtitle", {
+      y: 15,
+      opacity: 0,
+      duration: 0.6,
+      ease: "power2.out"
+    }, 17.7);
+
+    // Cinematic camera depth push-out to Scene 5
+    tl.to(".scene-metric", {
+      opacity: 0,
+      scale: 1.12,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 20.8);
+
+
+    // ==========================================
+    // BEAT 5 TIMELINE (21s - 27s)
+    // ==========================================
+    tl.set(".scene-outro", { autoAlpha: 1, pointerEvents: "auto" }, 20.8);
+    tl.fromTo(".scene-outro", {
+      opacity: 0,
+      scale: 0.88
+    }, {
+      opacity: 1,
+      scale: 1,
+      duration: 0.6,
+      ease: "power2.inOut"
+    }, 20.8);
+
+    // Product Hunt logo slides and floats in
+    tl.from(".ph-logo-img", {
+      scale: 0.5,
+      opacity: 0,
+      rotation: -12,
+      duration: 1.1,
+      ease: "back.out(1.5)"
+    }, 21.4);
+
+    // Stars pop in a staggered sequence around the logo
+    tl.from(".ph-star-svg", {
+      scale: 0,
+      opacity: 0,
+      stagger: 0.12,
+      duration: 0.8,
+      ease: "elastic.out(1.1, 0.4)"
+    }, 21.8);
+
+    // Star slow floating motion (finite repeat to avoid seek lockups)
+    gsap.utils.toArray(".ph-star-svg").forEach((star, i) => {
+      tl.to(star, {
+        y: i % 2 === 0 ? "+=15" : "-=15",
+        x: i % 3 === 0 ? "-=8" : "+=8",
+        rotation: i % 2 === 0 ? 10 : -10,
+        duration: 2.0,
+        yoyo: true,
+        repeat: 1, // Finite!
+        ease: "sine.inOut"
+      }, 22.8);
+    });
+
+    // Dynamic hold drift for Product Hunt Logo - START AFTER logo settles to avoid conflicts
+    tl.to(".ph-logo-img", {
+      y: "-=12",
+      duration: 1.5,
+      yoyo: true,
+      repeat: 1,
+      ease: "sine.inOut"
+    }, 22.8);
+
+    // Staggered Text entrance
+    tl.from(".o-title", {
+      y: 35,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 21.8);
+    tl.from(".o-subtitle", {
+      y: 25,
+      opacity: 0,
+      duration: 0.75,
+      ease: "power3.out"
+    }, 22.1);
+
+    // Call-to-action button entrance with dynamic scale pulse
+    tl.from(".outro-vote-btn", {
+      y: 40,
+      opacity: 0,
+      scale: 0.9,
+      duration: 0.85,
+      ease: "back.out(1.5)"
+    }, 22.5);
+
+    // Outro vote button subtle hover float - START AFTER button settles to avoid overwrite conflicts
+    tl.to(".outro-vote-btn", {
+      y: "-=6",
+      duration: 1.2,
+      yoyo: true,
+      repeat: 1,
+      ease: "sine.inOut"
+    }, 23.6);
+
+    // Glowing border shine pulse on CTA
+    tl.to(".outro-vote-btn", {
+      boxShadow: "0 22px 60px rgba(218, 85, 47, 0.65)",
+      repeat: 1,
+      yoyo: true,
+      duration: 0.9,
+      ease: "sine.inOut"
+    }, 23.6);
+
+    // Register paused timeline with Hyperframes adapter
+    window.__timelines.Main = tl;
   </script>
 </body>
 </html>
